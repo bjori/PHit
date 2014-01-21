@@ -1,0 +1,1 @@
+    ZEND_ARG_OBJ_INFO(<?=$by_ref?>, <?=$arg?>, <?=$arg_class?>, <?=$null?>)

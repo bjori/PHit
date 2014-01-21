@@ -1,0 +1,13 @@
+// $Id$
+// vim:ft=javascript
+
+// If your extension references something external, use ARG_WITH
+// ARG_WITH("ida", "for ida support", "no");
+
+// Otherwise, use ARG_ENABLE
+// ARG_ENABLE("ida", "enable ida support", "no");
+
+if (PHP_IDA != "no") {
+	EXTENSION("ida", "ida.c");
+}
+

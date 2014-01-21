@@ -1,0 +1,3 @@
+	<?=$docblock?>
+	PHP_ABSTRACT_ME(<?=$class?>, <?=$method?>, ai_<?=$class?>_<?=$method?>)
+
