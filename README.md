@@ -16,6 +16,8 @@ awkwardness of PDO base classes by using interfaces instead.
 
 ## Open Issues
 
+  * naming things
+  * more documentation
   * default fetch type
   * query parameter placeholders
   * query parameter types
@@ -193,6 +195,9 @@ awkwardness of PDO base classes by using interfaces instead.
 	
 	namespace IDA;
 	
+	/**
+	 * A query result (command success, result set, ...)
+	 */
 	interface Result extends \Countable, \Traversable
 	{
 		/**
@@ -413,8 +418,8 @@ awkwardness of PDO base classes by using interfaces instead.
 		const RW = 0x6;
 		
 		/**
-		 * Retrieve the associated connection
-		 * @return IDA\Connection
+		 * Retrieve the associated transaction
+		 * @return IDA\Transation
 		 */
 		public function getTransaction();
 		
@@ -710,7 +715,7 @@ awkwardness of PDO base classes by using interfaces instead.
 	namespace IDA\Feature;
 	
 	/**
-	 * Indiactes that the transaction implementation supports creating savepoints asynchronously.
+	 * Indicates that the transaction implementation supports creating savepoints asynchronously.
 	 */
 	interface AsyncSavepointTransaction
 	{
@@ -773,8 +778,9 @@ awkwardness of PDO base classes by using interfaces instead.
 		 * Execute the statement asynchronously
 		 * @return void
 		 * @param array $params
+		 * @param callable $cb
 		 */
-		public function execAsync(array $params = null);
+		public function execAsync(array $params = null, callable $cb = null);
 	}
 	?>
 ```

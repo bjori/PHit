@@ -277,7 +277,9 @@ static zend_function_entry php_ida_Statement_me[] = {
 
 /* {{{ IDA\Result */
 
-
+/**
+ * A query result (command success, result set, ...)
+ */
 zend_class_entry *php_ida_Result_ce;
 
 /**
@@ -619,8 +621,8 @@ static zend_function_entry php_ida_Transaction_me[] = {
 zend_class_entry *php_ida_LOB_ce;
 
 /**
- * Retrieve the associated connection
- * @return IDA\Connection
+ * Retrieve the associated transaction
+ * @return IDA\Transation
  */
 ZEND_BEGIN_ARG_INFO_EX(ai_LOB_getTransaction, 0, 0, 0)
 ZEND_END_ARG_INFO();
@@ -689,8 +691,8 @@ ZEND_END_ARG_INFO();
 
 static zend_function_entry php_ida_LOB_me[] = {
 	/**
-	 * Retrieve the associated connection
-	 * @return IDA\Connection
+	 * Retrieve the associated transaction
+	 * @return IDA\Transation
 	 */
 	PHP_ABSTRACT_ME(LOB, getTransaction, ai_LOB_getTransaction)
 
@@ -1098,7 +1100,7 @@ static zend_function_entry php_ida_SavepointTransaction_me[] = {
 /* {{{ IDA\Feature\AsyncSavepointTransaction */
 
 /**
- * Indiactes that the transaction implementation supports creating savepoints asynchronously.
+ * Indicates that the transaction implementation supports creating savepoints asynchronously.
  */
 zend_class_entry *php_ida_AsyncSavepointTransaction_ce;
 
@@ -1196,9 +1198,11 @@ zend_class_entry *php_ida_AsyncStatement_ce;
  * Execute the statement asynchronously
  * @return void
  * @param array $params
+ * @param callable $cb
  */
 ZEND_BEGIN_ARG_INFO_EX(ai_AsyncStatement_execAsync, 0, 0, 0)
 	ZEND_ARG_ARRAY_INFO(0, params, 1)
+	ZEND_ARG_INFO(0, cb)  /* callable */ 
 ZEND_END_ARG_INFO();
 
 
@@ -1207,6 +1211,7 @@ static zend_function_entry php_ida_AsyncStatement_me[] = {
 	 * Execute the statement asynchronously
 	 * @return void
 	 * @param array $params
+	 * @param callable $cb
 	 */
 	PHP_ABSTRACT_ME(AsyncStatement, execAsync, ai_AsyncStatement_execAsync)
 
@@ -1237,7 +1242,9 @@ PHP_MINIT_FUNCTION(ida)
 	INIT_NS_CLASS_ENTRY(ce, "IDA", "Statement", php_ida_Statement_me);
 	php_ida_Statement_ce = zend_register_internal_interface(&ce TSRMLS_CC);
 
-	
+	/**
+	 * A query result (command success, result set, ...)
+	 */
 	memset(&ce, 0, sizeof(ce));
 	INIT_NS_CLASS_ENTRY(ce, "IDA", "Result", php_ida_Result_me);
 	php_ida_Result_ce = zend_register_internal_interface(&ce TSRMLS_CC);
@@ -1317,7 +1324,7 @@ PHP_MINIT_FUNCTION(ida)
 	php_ida_SavepointTransaction_ce = zend_register_internal_interface(&ce TSRMLS_CC);
 
 	/**
-	 * Indiactes that the transaction implementation supports creating savepoints asynchronously.
+	 * Indicates that the transaction implementation supports creating savepoints asynchronously.
 	 */
 	memset(&ce, 0, sizeof(ce));
 	INIT_NS_CLASS_ENTRY(ce, "IDA\\Feature", "AsyncSavepointTransaction", php_ida_AsyncSavepointTransaction_me);
