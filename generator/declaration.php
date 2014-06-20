@@ -1,13 +1,11 @@
-/* {{{ <?=str_replace("\\\\", "\\", $ns)?>\<?=$class?> */
-
 <?=$docblock?>
-zend_class_entry *php_ida_<?=$class?>_ce;
+/* {{{ <?=str_replace("\\\\", "\\", $ns)?>\<?=$class?> */
 
 <?=$arginfos?>
 
-static zend_function_entry php_ida_<?=$class?>_me[] = {
+static zend_function_entry php_phongo_<?=strtolower($class)?>_me[] = {
 <?=$entries?>
-	{NULL}
+	PHP_FE_END
 };
 
 /* }}} */

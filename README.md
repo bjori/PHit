@@ -1,54 +1,4 @@
-# IDA
-
-Interfaces for Database Access, or, what PDO could have been.
-
-Imagine a world... no seriously, the intention of IDA is to enable any database
-vendor to provide a database access implementation adhering to a commonly
-defined application programming interface without the need to implement a PDO
-driver which comes with a huge loss of performance in many situations and the
-awkwardness of PDO base classes by using interfaces instead.
-
-## Goals
-
-  * common database access programming interfaces
-  * freedom for the database system vendor to implement features unique to them
-  * 100% native performance, no needless API layers tossed on top
-
-## Open Issues
-
-  * naming things
-  * more documentation
-  * default fetch type
-  * query parameter placeholders
-  * query parameter types
-  * cursor feature
-  * charset api
-  * metadata api
-  * exception subtyping
-  * sqlstate errors
-  
-## Tasks
-
-  * define interfaces
-  * write conformance test suite
-  * write/migrate implementations
-
-## Exception usage
-
-  * any method that is supposed to return a complex structure (i.e. array or 
-    object) must throw an appropriate exception if it is unable to do so.
-  
-## Interfaces
-
-  * namespace IDA  
-    First class interfaces that MUST be implemented by a conforming implementation.
-  * namespace IDA\Feature
-    Optional feature APIs that SHOULD be implemented by a conforming implemenation.
-
-
-### IDA\Connection
-```php
-	<?php
+<?php
 	
 	namespace IDA;
 	
@@ -147,10 +97,6 @@ awkwardness of PDO base classes by using interfaces instead.
 		public function unsescapeBinary($data);
 	}
 	?>
-```
-
-### IDA\Statement
-```php
 	<?php
 	
 	namespace IDA;
@@ -187,10 +133,6 @@ awkwardness of PDO base classes by using interfaces instead.
 		public function exec(array $params = null);
 	}
 	?>
-```
-
-### IDA\Result
-```php
 	<?php
 	
 	namespace IDA;
@@ -311,10 +253,6 @@ awkwardness of PDO base classes by using interfaces instead.
 		public function map($key_columns = 0, $val_columns = null, $fetch_type = -1);
 	}
 	?>
-```
-
-### IDA\Transaction
-```php
 	<?php
 	
 	namespace IDA;
@@ -389,10 +327,6 @@ awkwardness of PDO base classes by using interfaces instead.
 		public function rollback();
 	}
 	?>
-```
-
-### IDA\LOB
-```php
 	<?php
 	
 	namespace IDA;
@@ -472,10 +406,6 @@ awkwardness of PDO base classes by using interfaces instead.
 		public function truncate($length = 0);
 	}
 	?>
-```
-
-### IDA\Feature\PersistentConnection
-```php
 	<?php
 	
 	namespace IDA\Feature;
@@ -497,10 +427,6 @@ awkwardness of PDO base classes by using interfaces instead.
 		public function isPersistent();
 	}
 	?>
-```
-
-### IDA\Feature\AsyncConnection
-```php
 	<?php
 	
 	namespace IDA\Feature;
@@ -616,10 +542,6 @@ awkwardness of PDO base classes by using interfaces instead.
 		public function waitForCompletion();
 	}
 	?>
-```
-
-### IDA\Feature\TransactingConnection
-```php
 	<?php
 	
 	namespace IDA\Feature;
@@ -638,10 +560,6 @@ awkwardness of PDO base classes by using interfaces instead.
 		public function startTransaction($isolation = 0, $readonly = false);
 	}
 	?>
-```
-
-### IDA\Feature\AsyncTransactingConnection
-```php
 	<?php
 	
 	namespace IDA\Feature;
@@ -660,10 +578,6 @@ awkwardness of PDO base classes by using interfaces instead.
 		public function startTransactionAsync($isolation = 0, $readonly = false);
 	}
 	?>
-```
-
-### IDA\Feature\AsyncTransaction
-```php
 	<?php
 	
 	namespace IDA\Feature;
@@ -686,10 +600,6 @@ awkwardness of PDO base classes by using interfaces instead.
 		public function rollbackAsync();
 	}
 	?>
-```
-
-### IDA\Feature\SavepointTransaction
-```php
 	<?php
 	
 	namespace IDA\Feature;
@@ -706,10 +616,6 @@ awkwardness of PDO base classes by using interfaces instead.
 		public function savepoint();
 	}
 	?>
-```
-
-### IDA\Feature\AsyncSavepointTransaction
-```php
 	<?php
 	
 	namespace IDA\Feature;
@@ -726,10 +632,6 @@ awkwardness of PDO base classes by using interfaces instead.
 		public function savepointAsync();
 	}
 	?>
-```
-
-### IDA\Feature\LOBTransaction
-```php
 	<?php
 	
 	namespace IDA\Feature;
@@ -761,10 +663,6 @@ awkwardness of PDO base classes by using interfaces instead.
 		public function unlinkLOB($id);
 	}
 	?>
-```
-
-### IDA\Feature\AsyncStatement
-```php
 	<?php
 	
 	namespace IDA\Feature;
@@ -783,4 +681,3 @@ awkwardness of PDO base classes by using interfaces instead.
 		public function execAsync(array $params = null, callable $cb = null);
 	}
 	?>
-```

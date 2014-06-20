@@ -1,3 +1,1 @@
-	<?=$docblock?>
-	PHP_ABSTRACT_ME(<?=$class?>, <?=$method?>, ai_<?=$class?>_<?=$method?>)
-
+	PHP_ME(<?=$class?>, <?=$method?>, ai_<?=$class?>_<?=$method?>, ZEND_ACC_PUBLIC)

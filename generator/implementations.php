@@ -1,0 +1,7 @@
+/* {{{ proto <?=$rettype?> <?=$class?>::<?=$method?>(<?=$protoargs?>)
+<?=$oneliner ?> */
+PHP_METHOD(<?=$class?>, <?=$method?>)
+{
+<?=$code?>
+}
+/* }}} */

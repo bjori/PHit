@@ -1,61 +1,66 @@
 /*
-    +--------------------------------------------------------------------+
-    | Interfaces for Database Access                                     |
-    +--------------------------------------------------------------------+
-    | Redistribution and use in source and binary forms, with or without |
-    | modification, are permitted provided that the conditions mentioned |
-    | in the accompanying LICENSE file are met.                          |
-    +--------------------------------------------------------------------+
-    | Copyright (c) 2013, Michael Wallner <mike@php.net>                |
-    +--------------------------------------------------------------------+
+  +---------------------------------------------------------------------------+
+  | PHP Driver for MongoDB                                                    |
+  +---------------------------------------------------------------------------+
+  | Copyright 2013-2014 MongoDB, Inc.                                         |
+  |                                                                           |
+  | Licensed under the Apache License, Version 2.0 (the "License");           |
+  | you may not use this file except in compliance with the License.          |
+  | You may obtain a copy of the License at                                   |
+  |                                                                           |
+  | http://www.apache.org/licenses/LICENSE-2.0                                |
+  |                                                                           |
+  | Unless required by applicable law or agreed to in writing, software       |
+  | distributed under the License is distributed on an "AS IS" BASIS,         |
+  | WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  |
+  | See the License for the specific language governing permissions and       |
+  | limitations under the License.                                            |
+  +---------------------------------------------------------------------------+
+  | Copyright (c) 2014, MongoDB, Inc.                                         |
+  +---------------------------------------------------------------------------+
 */
 
 #ifdef HAVE_CONFIG_H
 #	include "config.h"
 #endif
 
-#include "php.h"
-#include "php_ini.h"
-#include "ext/standard/info.h"
-#include "Zend/zend_interfaces.h"
-#include "ext/spl/spl_iterators.h"
-#include "php_ida.h"
+/* External libs */
+#include <bson.h>
+#include <mongoc.h>
+
+/* PHP Core stuff */
+#include <php.h>
+#include <php_ini.h>
+#include <ext/standard/info.h>
+#include <Zend/zend_interfaces.h>
+#include <ext/spl/spl_iterators.h>
+/* Our Compatability header */
+#include "php_compat_53.h"
+
+/* Our stuffz */
+#include "php_phongo.h"
+#include "php_bson.h"
+
+
+PHPAPI zend_class_entry *php_phongo_<?=strtolower($class)?>_ce;
+
+<?= $implementations ?>
 
 <?= $declarations ?>
 
-PHP_MINIT_FUNCTION(ida)
+/* {{{ PHP_MINIT_FUNCTION */
+PHP_MINIT_FUNCTION(<?=$minitname?>)
 {
+	(void)type; /* We don't care if we are loaded via dl() or extension= */
 	zend_class_entry ce;
 
 <?= $registrations ?>
 
 	return SUCCESS;
 }
+/* }}} */
 
-PHP_MINFO_FUNCTION(ida)
-{
-	php_info_print_table_start();
-	php_info_print_table_header(2, "Interfaces for Database Access support", "enabled");
-	php_info_print_table_row(2, "Extension version", PHP_IDA_VERSION);
-	php_info_print_table_end();
-}
 
-zend_module_entry ida_module_entry = {
-	STANDARD_MODULE_HEADER,
-	"ida",
-	NULL,
-	PHP_MINIT(ida),
-	NULL,
-	NULL,
-	NULL,
-	PHP_MINFO(ida),
-	PHP_IDA_VERSION,
-	STANDARD_MODULE_PROPERTIES
-};
-
-#ifdef COMPILE_DL_IDA
-ZEND_GET_MODULE(ida)
-#endif
 
 /*
  * Local variables:
