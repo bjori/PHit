@@ -6,5 +6,5 @@
 	php_phongo_<?=strtolower($class)?>_ce = zend_register_internal_class(&ce TSRMLS_CC);
 <?php endif ?>
 <?php if ($isfinalclass): ?>
-    php_phongo_<?=strtolower($class)?>_ce.ce_flags |= ZEND_ACC_FINAL_CLASS
+	php_phongo_<?=strtolower($class)?>_ce.ce_flags |= ZEND_ACC_FINAL_CLASS;
 <?php endif ?>
