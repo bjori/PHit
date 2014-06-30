@@ -62,13 +62,14 @@ $implementations = "";
         $ns = str_replace("\\", "\\\\", $ns);
         $docblock = untab($reflection->getDocComment())."\n";
         $classorinterface = $reflection->isInterface() ? "interface" : "class";
+        $isfinalclass = $reflection->isFinal();
         if ($parent = $reflection->getParentClass()) {
             $parent = $parent->getName();
         } else {
             $parent = "NULL";
         }
         $registrations .= render("generator/$classorinterface.php", 
-            compact("ns", "class", "docblock", "parent"));
+            compact("ns", "class", "docblock", "parent", "isfinalclass"));
         $entries = "";
         $arginfos = "";
 
@@ -79,7 +80,7 @@ $implementations = "";
                     continue;
                 }
                 foreach($faces as $f) {
-                    $rfc = null;
+                    $rf = null;
                     try {
                         $rf = new ReflectionClass($f);
                     } catch(Exception $e) {
@@ -138,7 +139,7 @@ $implementations = "";
                     exit;
                 }
 
-                list($type, $short, $argprotohint, $rethint) = get_zpp_type($n+1, $m->getNumberOfParameters(), $param, $docblock);
+                list($type, $short, $argprotohint) = get_zpp_type($n+1, $m->getNumberOfParameters(), $param, $docblock);
                 if ($param->isArray()) {
                     $args .= render("generator/ai_arr.php", 
                         compact("class", "method", "arg", "null", "by_ref"));
@@ -203,7 +204,7 @@ function get_return_type($docblock) {
     $blocks = explode("\n", trim($docblock));
     foreach($blocks as $tmp) {
         if(strpos($tmp, "@return") !== false) {
-            list($nada, $param, $type, $name) = explode(" ", trim($tmp));
+            list($nada, $param, $type) = explode(" ", trim($tmp));
             if (isset($classes[$type])) {
                 return $classes[$type];
             }
@@ -217,7 +218,7 @@ function get_return_type($docblock) {
 }
 function get_zpp_type($current, $max, $param, $docblock) {
     if ($param->isArray()) {
-        return array("zval", "a");
+        return array("zval", "a", "array");
     }
     $blocks = explode("\n", trim($docblock));
     $argn = 0;
