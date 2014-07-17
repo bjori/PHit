@@ -1,4 +1,7 @@
-<?php $lclass = strtolower($class) ?>
+<?php
+$config = getDefaultConfig($config);
+$lclass = strtolower($class);
+?>
 /*
   +---------------------------------------------------------------------------+
   | PHP Driver for MongoDB                                                    |
@@ -41,25 +44,36 @@
 /* Our stuffz */
 #include "php_phongo.h"
 #include "php_bson.h"
+<?php foreach($config["headers"] as $header) {
+	echo "#include $header\n";
+} ?>
 
 
 PHONGO_API zend_class_entry *php_phongo_<?=$lclass?>_ce;
+<?=$config["forward_declarations"]?>
 
 <?= $implementations ?>
 
 <?= $declarations ?>
 
-/* {{{ php_phongo_<?=$lclass?>_free_object && php_phongo_<?=$lclass?>_create_object */
-static void php_phongo_<?=$lclass?>_free_object(void *object TSRMLS_DC)
+<?php if ($config["funcs"]) {
+	echo "/* {{{ Other functions */\n";
+	echo $config["funcs"];
+	echo "/* }}} */\n";
+}
+?>
+/* {{{ php_phongo_<?=$lclass?>_t object handlers */
+static void php_phongo_<?=$lclass?>_free_object(void *object TSRMLS_DC) /* {{{ */
 {
 	php_phongo_<?=$lclass?>_t *intern = (php_phongo_<?=$lclass?>_t*)object;
 
-	zend_object_std_dtor(&intern->std TSRMLS_CC);
+	zend_object_std_dtor(&intern-><?=$config["internwrapper"]?>std TSRMLS_CC);
 
+<?=$config["free"]?>
 	efree(intern);
-}
+} /* }}} */
 
-zend_object_value php_phongo_<?=$lclass?>_create_object(zend_class_entry *class_type TSRMLS_DC)
+zend_object_value php_phongo_<?=$lclass?>_create_object(zend_class_entry *class_type TSRMLS_DC) /* {{{ */
 {
 	zend_object_value retval;
 	php_phongo_<?=$lclass?>_t *intern;
@@ -67,14 +81,14 @@ zend_object_value php_phongo_<?=$lclass?>_create_object(zend_class_entry *class_
 	intern = (php_phongo_<?=$lclass?>_t *)emalloc(sizeof(php_phongo_<?=$lclass?>_t));
 	memset(intern, 0, sizeof(php_phongo_<?=$lclass?>_t));
 
-	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
-	object_properties_init(&intern->std, class_type);
+	zend_object_std_init(&intern-><?=$config["internwrapper"]?>std, class_type TSRMLS_CC);
+	object_properties_init(&intern-><?=$config["internwrapper"]?>std, class_type);
 
 	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t) zend_objects_destroy_object, php_phongo_<?=$lclass?>_free_object, NULL TSRMLS_CC);
-	retval.handlers = phongo_get_std_object_handlers();
+	retval.handlers = <?=$config["handlers_callback"]?>();
 
 	return retval;
-}
+} /* }}} */
 /* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION */

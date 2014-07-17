@@ -17,6 +17,7 @@ function untab($text) {
 
 function map_iface($i) {
 	$map = [
+        "IteratorAggregate" => "zend_ce_aggregate",
 		"Iterator" => "spl_ce_Iterator",
 		"Countable" => "spl_ce_Countable",
 	];
@@ -68,8 +69,12 @@ $implementations = "";
         } else {
             $parent = "NULL";
         }
+
+        $config = isset($$class) ? $$class : array();
+
+
         $registrations .= render("generator/$classorinterface.php", 
-            compact("ns", "class", "docblock", "parent", "isfinalclass"));
+            compact("ns", "class", "docblock", "parent", "isfinalclass", "config"));
         $entries = "";
         $arginfos = "";
 
@@ -109,8 +114,10 @@ $implementations = "";
             $method = $m->getName();
             $docblock = untab($m->getDocComment())."\n";
             $template = $reflection->isInterface() ? "abstract_me.php" : "me.php";
+            $flags = "ZEND_ACC_PUBLIC";
+            $flags .= $reflection->isFinal() ? "|ZEND_ACC_FINAL" : "";
             $entries .= render("generator/$template", 
-                compact("class", "method", "docblock"));
+                compact("class", "method", "docblock", "flags"));
             $args = "";
             $req_args = 0;
             $protoargs = "";
@@ -161,16 +168,32 @@ $implementations = "";
                     $args .= render("generator/ai_std.php", 
                         compact("class", "method", "arg", "null", "by_ref", "callable"));
                 }
+                if ($param->isDefaultValueAvailable()) {
+                    $default = $param->getDefaultValue();
+                    if ($default === NULL) {
+                        $default = "NULL";
+                    } elseif ($default === true) {
+                        $default = 1;
+                    } elseif ($default === false) {
+                        $default = 0;
+                    } elseif ($default === array()) {
+                        $default = "NULL";
+                    }
+                } else {
+                    $default = "";
+                }
                 $zpp[] = array(
                     "type" => $type,
                     "short" => $short,
                     "name"  => $arg,
+                    "default" => $default,
                 );
                 $req_args += !$param->isOptional();
             }
             $classtype = "php_phongo_{$class}_t";
+            $codes = get_code_from($m->getFilename(), $m->getStartLine(), $m->getEndLine());
             $code = render("generator/zpp.php", 
-                compact("zpp", "req_args", "classtype"));
+                compact("zpp", "req_args", "classtype", "codes"));
             if ($n>0) {
                 $protoargs .= str_repeat("]", ($n+1)-$req_args);
             }
@@ -193,7 +216,7 @@ $implementations = "";
         $declarations .= render("generator/declaration.php", 
             compact("ns", "class", "entries", "docblock", "arginfos"));
         $minitname = $class;
-        $data = render($_SERVER["argv"][1], compact("declarations", "registrations", "implementations", "minitname", "class"));
+        $data = render($_SERVER["argv"][1], compact("declarations", "registrations", "implementations", "minitname", "class", "config"));
         file_put_contents("src/$class.c", $data);
     }
 }
@@ -236,6 +259,9 @@ function get_zpp_type($current, $max, $param, $docblock) {
     }
     list($nada, $param, $type, $name) = explode(" ", trim($argproto));
     switch($type) {
+    case "bool":
+    case "boolean":
+        return array("zend_bool", "b", "boolean");
     case "string":
         return array("char", "s", "string");
     case "integer":
@@ -246,6 +272,9 @@ function get_zpp_type($current, $max, $param, $docblock) {
     case "zval":
         return array("zval", "z", "mixed");
     default:
+        if ($type == "callable") {
+            return array("zval", "o", "callable");
+        }
         return array($type, "O", $type);
     }
 }
@@ -260,4 +289,68 @@ function getZPPType($type) {
     default:
         return "zval";
     }
+}
+function get_code_from($filename, $start, $end)
+{
+    $retval = array();
+    if ($end > $start+1) {
+        $file = file($filename, FILE_IGNORE_NEW_LINES);
+        $content = array_slice($file, $start, $end-$start);
+        $cef = 0;
+        $cimpl = 0;
+        $data = array();
+        foreach($content as $locator) {
+            switch(trim($locator)) {
+            case "/*** CEF ***/":
+                $cef++;
+                break;
+            case "/*** CIMPL ***/":
+                $cimpl++;
+                break;
+            }
+
+            if ($cef == 1) {
+                $cef++;
+            } else if ($cef == 2) {
+                $ws = strspn($locator, " ");
+                $tabs = $ws / 4;
+                $data[] = str_repeat("\t", $tabs) . trim($locator, " ");
+            } else if ($cef == 3) {
+                $retval["cef"] = join("\n", array_slice($data, 1, -1));
+                $data = array();
+                $cef++;
+
+            }
+            if ($cimpl == 1) {
+                $cimpl++;
+            } else if ($cimpl == 2) {
+                $ws = strspn($locator, " ");
+                $tabs = $ws / 4;
+                $data[] = str_repeat("\t", $tabs) . trim($locator, " ");
+            } else if ($cimpl == 3) {
+                $retval["cimpl"] = join("\n", array_slice($data, 1, -1));
+                $cimpl++;
+            }
+        }
+    }
+
+    return $retval;
+}
+
+
+function getDefaultConfig($config) {
+    $def = array(
+        "free" => false,
+        "funcs" => "", 
+        "internwrapper" => "",
+        "ce" => array(),
+        "headers" => array(),
+        "handlers_callback" => "phongo_get_std_object_handlers",
+        "handlers_init"     => "",
+        "forward_declarations" => "",
+    );
+
+    $config = array_merge($def, $config);
+
+    return $config;
 }
