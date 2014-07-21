@@ -217,7 +217,11 @@ $implementations = "";
             compact("ns", "class", "entries", "docblock", "arginfos"));
         $minitname = $class;
         $data = render($_SERVER["argv"][1], compact("declarations", "registrations", "implementations", "minitname", "class", "config"));
-        file_put_contents("src/$class.c", $data);
+        $namespace = str_replace("\\", "/", $reflection->getNamespaceName());
+        if (!is_dir("src/$namespace")) {
+            mkdir("src/$namespace", 0777, true);
+        }
+        file_put_contents("src/$namespace/$class.c", $data);
     }
 }
 
