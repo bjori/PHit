@@ -266,6 +266,7 @@ function get_zpp_type($current, $max, $param, $docblock) {
     case "bool":
     case "boolean":
         return array("zend_bool", "b", "boolean");
+    case "integer|string":
     case "string":
         return array("char", "s", "string");
     case "integer":
