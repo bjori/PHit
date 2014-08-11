@@ -10,7 +10,7 @@ foreach($zpp as $n => $arg) {
 	}
 	if ($arg["short"]) {
         $short .= $arg["short"];
-        if ($arg["default"] == "NULL" && !in_array($arg["type"], array("boolean", "long", "double"))) {
+        if ($arg["default"] == "NULL" && !in_array($arg["type"], array("zend_bool", "long", "double"))) {
             $short .= "!";
         }
 	}

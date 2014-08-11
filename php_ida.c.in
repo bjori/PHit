@@ -62,6 +62,7 @@ PHONGO_API zend_class_entry *php_phongo_<?=$lclass?>_ce;
 	echo "/* }}} */\n";
 }
 ?>
+<?php if ($config["generate_handlers"]): ?>
 /* {{{ php_phongo_<?=$lclass?>_t object handlers */
 static void php_phongo_<?=$lclass?>_free_object(void *object TSRMLS_DC) /* {{{ */
 {
@@ -90,6 +91,7 @@ zend_object_value php_phongo_<?=$lclass?>_create_object(zend_class_entry *class_
 	return retval;
 } /* }}} */
 /* }}} */
+<?php endif ?>
 
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(<?=$minitname?>)

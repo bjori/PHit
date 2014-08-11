@@ -61,16 +61,22 @@ $implementations = "";
         $ns = substr($iface, 0, $pos);
         $class = substr($iface, $pos + 1);
         $ns = str_replace("\\", "\\\\", $ns);
+
+        $config = isset($$class) ? $$class : array();
+
         $docblock = untab($reflection->getDocComment())."\n";
-        $classorinterface = $reflection->isInterface() ? "interface" : "class";
+        if ($reflection->isInterface()) {
+            $classorinterface = "interface";
+            $config["generate_handlers"] = false;
+        } else {
+            $classorinterface = "class";
+        }
         $isfinalclass = $reflection->isFinal();
         if ($parent = $reflection->getParentClass()) {
             $parent = $parent->getName();
         } else {
             $parent = "NULL";
         }
-
-        $config = isset($$class) ? $$class : array();
 
 
         $registrations .= render("generator/$classorinterface.php", 
@@ -99,11 +105,11 @@ $implementations = "";
             $ni = count($faces);
             $impl_list = implode(", ", $faces);
             $registrations .= render("generator/implements.php", 
-                compact("class", "ni", "impl_list"));
+                compact("class", "ni", "impl_list", "config"));
         }
         foreach ($reflection->getConstants() as $cname => $cvalue) {
             $registrations .= render("generator/constant.php",
-                compact("class", "cname", "cvalue"));
+                compact("class", "cname", "cvalue", "config"));
         }
         foreach ($reflection->getMethods() as $m) {
             $zpp = array();
@@ -117,7 +123,7 @@ $implementations = "";
             $flags = "ZEND_ACC_PUBLIC";
             $flags .= $reflection->isFinal() ? "|ZEND_ACC_FINAL" : "";
             $entries .= render("generator/$template", 
-                compact("class", "method", "docblock", "flags"));
+                compact("class", "method", "docblock", "flags", "config"));
             $args = "";
             $req_args = 0;
             $protoargs = "";
@@ -149,7 +155,7 @@ $implementations = "";
                 list($type, $short, $argprotohint) = get_zpp_type($n+1, $m->getNumberOfParameters(), $param, $docblock);
                 if ($param->isArray()) {
                     $args .= render("generator/ai_arr.php", 
-                        compact("class", "method", "arg", "null", "by_ref"));
+                        compact("class", "method", "arg", "null", "by_ref", "config"));
                     $protoargs .= "array \$$arg";
                     if ($param->isOptional()) {
                         $protoargs .= " = array()";
@@ -158,7 +164,7 @@ $implementations = "";
                     $arg_class = $arg_class->getName();
                     $protoargs .= "$arg_class \$$arg";
                     $args .= render("generator/ai_obj.php", 
-                        compact("class", "method", "arg", "null", "by_ref", "arg_class"));
+                        compact("class", "method", "arg", "null", "by_ref", "arg_class", "config"));
                     if ($param->isOptional()) {
                         $protoargs .= " = null";
                     }
@@ -166,7 +172,7 @@ $implementations = "";
                     $callable = $param->isCallable();
                     $protoargs .= $callable ? "callable \$$arg" : "$argprotohint \$$arg";
                     $args .= render("generator/ai_std.php", 
-                        compact("class", "method", "arg", "null", "by_ref", "callable"));
+                        compact("class", "method", "arg", "null", "by_ref", "callable", "config"));
                 }
                 if ($param->isDefaultValueAvailable()) {
                     $default = $param->getDefaultValue();
@@ -193,13 +199,13 @@ $implementations = "";
             $classtype = "php_phongo_{$class}_t";
             $codes = get_code_from($m->getFilename(), $m->getStartLine(), $m->getEndLine());
             $code = render("generator/zpp.php", 
-                compact("zpp", "req_args", "classtype", "codes"));
+                compact("zpp", "req_args", "classtype", "codes", "config"));
             if ($n>0) {
                 $protoargs .= str_repeat("]", ($n+1)-$req_args);
             }
 
             $arginfos .= render("generator/arginfos.php", 
-                compact("class", "method", "args", "req_args", "docblock"));
+                compact("class", "method", "args", "req_args", "docblock", "config"));
 
             $oneliner = explode("\n", $docblock)[1];
             $oneliner = "   " . trim($oneliner, " *\t");
@@ -209,12 +215,12 @@ $implementations = "";
             }
             if (!$reflection->isInterface()) {
                 $implementations .= render("generator/implementations.php", 
-                    compact("class", "method", "oneliner", "protoargs", "code", "rettype"));
+                    compact("class", "method", "oneliner", "protoargs", "code", "rettype", "config"));
             }
         }
         $docblock = untab($reflection->getDocComment())."\n";
         $declarations .= render("generator/declaration.php", 
-            compact("ns", "class", "entries", "docblock", "arginfos"));
+            compact("ns", "class", "entries", "docblock", "arginfos", "config"));
         $minitname = $class;
         $data = render($_SERVER["argv"][1], compact("declarations", "registrations", "implementations", "minitname", "class", "config"));
         $namespace = str_replace("\\", "/", $reflection->getNamespaceName());
@@ -353,6 +359,7 @@ function getDefaultConfig($config) {
         "handlers_callback" => "phongo_get_std_object_handlers",
         "handlers_init"     => "",
         "forward_declarations" => "",
+        "generate_handlers" => true,
     );
 
     $config = array_merge($def, $config);
